@@ -1,6 +1,9 @@
 import 'package:datepicker_dropdown/datepicker_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -10,11 +13,35 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class RegisterPage extends State<RegisterScreen> {
+  String? errorMessage = '';
+  bool isLogin = true;
+  bool _loading = false;
+
+  final _displayNameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _countryController = TextEditingController();
+
+
+
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  AutovalidateMode autoValidate = AutovalidateMode.disabled;
+
+
+  AutovalidateMode _autovalidate = AutovalidateMode.disabled;
   int _selectedDay = 14;
   int _selectedMonth = 10;
   int _selectedYear = 1993;
+
+  //String to datetime conversion
+  DateTime? _dateTime(int? day, int? month, int? year) {
+    if (day != null && month != null && year != null) {
+      return DateTime(year, month, day);
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,20 +72,33 @@ class RegisterPage extends State<RegisterScreen> {
               const SizedBox(
                 height: 15,
               ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 200,
-                  maxWidth: 200,
-                ),
-                child: Image.asset(
-                  'assets/app_icon.png',
+              const Text(
+                'Neon',
+                style: TextStyle(
+                  color: Colors.purple,
+                  fontSize: 40,
                 ),
               ),
-
+              Padding(
+                padding: const EdgeInsets.fromLTRB(100, 1, 20, 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'A Gamers Paradise',
+                      style: TextStyle(
+                          color: Colors.purple[300],
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(
                 height: 30,
               ),
-              SizedBox(
+              Container(
                 height: 480,
                 width: 325,
                 child: Column(
@@ -68,7 +108,7 @@ class RegisterPage extends State<RegisterScreen> {
                       height: 20,
                     ),
                     const Text(
-                      'Create a neon account.',
+                      'Sign up your Neon account.',
                       style: TextStyle(
                           fontSize: 16,
                           color: Colors.black38,
@@ -78,184 +118,202 @@ class RegisterPage extends State<RegisterScreen> {
                     const SizedBox(
                       height: 30,
                     ),
-                    const SizedBox(
-                        height: 45,
-                        width: 400,
-                        child: TextField(
-                          decoration: InputDecoration(
-                              labelText: 'Display Name  *',
-                              labelStyle: TextStyle(
-                                color: Colors.black87,
-                              ),
-                              filled: true,
-                              fillColor: Colors.black26),
-                        )),
-                    const SizedBox(
+                    Container(
+                      height: 45,
+                      width: 400,
+                      child: TextField(
+                        controller: _displayNameController,
+                        keyboardType: TextInputType.name,
+                        decoration: InputDecoration(
+                            labelStyle: TextStyle(
+                              color: Colors.black54,
+                            ),
+                            labelText: 'Display Name  *',
+                            filled: true,
+                            fillColor: Colors.black26),
+                      ),
+                    ),
+                    SizedBox(
                       height: 2,
                     ),
-                    const Row(children: [
-                      Flexible(
-                        child: TextField(
-                          decoration: InputDecoration(
-                              labelText: '  First Name  *',
-                              labelStyle: TextStyle(
-                                color: Colors.black87,
-                              ),
-                              filled: true,
-                              fillColor: Colors.black26,
-                              contentPadding: EdgeInsets.all(1)),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: TextField(
+                            controller: _firstNameController,
+                            keyboardType: TextInputType.name,
+                            decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
+                                labelText: '  First Name  *',
+                                filled: true,
+                                fillColor: Colors.black26,
+                                suffixIcon:
+                                Icon(FontAwesomeIcons.envelope, size: 17),
+                                contentPadding: EdgeInsets.all(1)),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Flexible(
+                          child: TextField(
+                            controller: _lastNameController,
+                            keyboardType: TextInputType.name,
+                            decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
+                                labelText: '  Last Name  *',
+                                filled: true,
+                                fillColor: Colors.black26,
+                                contentPadding: EdgeInsets.all(1)),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 2,
+                    ),
+                    Container(
+                      height: 45,
+                      width: 400,
+                      child: TextField(
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          labelStyle: TextStyle(
+                            color: Colors.black54,
+                          ),
+                          labelText: 'Phone  *',
+                          filled: true,
+                          fillColor: Colors.black26,
                         ),
                       ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Flexible(
-                        child: TextField(
-                          decoration: InputDecoration(
-                              labelText: '  Last Name  *',
-                              labelStyle: TextStyle(
-                                color: Colors.black87,
-                              ),
-                              filled: true,
-                              fillColor: Colors.black26,
-                              contentPadding: EdgeInsets.all(1)),
+                    ),
+                    SizedBox(
+                      height: 2,
+                    ),
+                    Container(
+                      height: 45,
+                      width: 400,
+                      child: TextField(
+                        controller: _countryController,
+                        keyboardType: TextInputType.name,
+                        decoration: InputDecoration(
+                          labelStyle: TextStyle(
+                            color: Colors.black54,
+                          ),
+                          labelText: 'Country  *',
+                          filled: true,
+                          fillColor: Colors.black26,
                         ),
                       ),
-                    ]),
-                    const SizedBox(
+                    ),
+                    SizedBox(
                       height: 2,
                     ),
-                    const SizedBox(
-                        height: 45,
-                        width: 400,
-                        child: TextField(
-                          decoration: InputDecoration(
-                              labelText: 'Country  *',
-                              labelStyle: TextStyle(
-                                color: Colors.black87,
-                              ),
-                              filled: true,
-                              fillColor: Colors.black26,
-                              suffixIcon: Icon(
-                                FontAwesomeIcons.flag,
-                                size: 17,
-                                color: Colors.black87,
-                              )),
-                        )),
-                    const SizedBox(
+                    Container(
+                      height: 45,
+                      width: 400,
+                      child: TextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                            labelStyle: TextStyle(
+                              color: Colors.black54,
+                            ),
+                            labelText: 'Email Address  *',
+                            filled: true,
+                            fillColor: Colors.black26,
+                            suffixIcon:
+                            Icon(FontAwesomeIcons.envelope, size: 17)),
+                      ),
+                    ),
+                    SizedBox(
                       height: 2,
                     ),
-                    const SizedBox(
-                        height: 45,
-                        width: 400,
-                        child: TextField(
-                          decoration: InputDecoration(
-                              labelText: 'Email Address  *',
-                              labelStyle: TextStyle(
-                                color: Colors.black87,
-                              ),
-                              filled: true,
-                              fillColor: Colors.black26,
-                              suffixIcon: Icon(
-                                FontAwesomeIcons.envelope,
-                                size: 17,
-                                color: Colors.black87,
-                              )),
-                        )),
-                    const SizedBox(
-                      height: 2,
+                    Container(
+                      height: 45,
+                      width: 400,
+                      child: TextField(
+                        controller: _passwordController,
+                        keyboardType: TextInputType.visiblePassword,
+                        decoration: InputDecoration(
+                            labelStyle: TextStyle(
+                              color: Colors.black54,
+                            ),
+                            labelText: 'Password  *',
+                            filled: true,
+                            fillColor: Colors.black26,
+                            suffixIcon:
+                            Icon(FontAwesomeIcons.eyeSlash, size: 17)),
+                      ),
                     ),
-                    const SizedBox(
-                        height: 45,
-                        width: 400,
-                        child: TextField(
-                          decoration: InputDecoration(
-                              labelText: 'Password  *',
-                              labelStyle: TextStyle(
-                                color: Colors.black87,
-                              ),
-                              filled: true,
-                              fillColor: Colors.black26,
-                              suffixIcon: Icon(
-                                FontAwesomeIcons.eyeSlash,
-                                size: 17,
-                                color: Colors.black87,
-                              )),
-                        )),
-                    const SizedBox(
+                    SizedBox(
                       height: 2,
                     ),
                     Form(
-                        key: formKey,
-                        autovalidateMode: autoValidate,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              DropdownDatePicker(
-                                locale: "en",
-                                inputDecoration: const InputDecoration(
-                                  filled: true,
-                                  fillColor: Colors.black26,
-                                  contentPadding: EdgeInsets.all(1),
-                                ),
-                                // optional
-                                isDropdownHideUnderline: true,
-                                // optional
-                                isFormValidator: true,
-                                // optional
-                                startYear: 1900,
-                                // optional
-                                endYear: 2020,
-                                // optional
-                                width: 0.5,
-                                // optional
-                                selectedDay: _selectedDay,
-                                // optional
-                                selectedMonth: _selectedMonth,
-                                // optional
-                                selectedYear: _selectedYear,
-                                // optional
-                                boxDecoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: Colors.black26, width: 0.5),
-                                ),
-                                hintTextStyle:
-                                    const TextStyle(color: Colors.black38),
-                                onChangedDay: (value) {
-                                  _selectedDay = int.parse(value!);
-                                  //print('onChangedDay: $value');
-                                },
-                                onChangedMonth: (value) {
-                                  _selectedMonth = int.parse(value!);
-                                  //print('onChangedMonth: $value');
-                                },
-                                onChangedYear: (value) {
-                                  _selectedYear = int.parse(value!);
-                                  //print('onChangedYear: $value');
-                                },
+                      key: formKey,
+                      autovalidateMode: _autovalidate,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            DropdownDatePicker(
+                              locale: "en",
+                              inputDecoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.black26,
+                                contentPadding: EdgeInsets.all(1),
                               ),
-                            ],
-                          ),
-                        )),
-                    const SizedBox(
-                      height: 1,
-                    ),
-                    CheckboxListTile(
-                      activeColor: Colors.black54,
-                      title: const Text(
-                        'I have read and agree to Terms of Service.',
-                        style: TextStyle(
-                          color: Colors.black38,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          fontSize: 12,
+                              // optional
+                              isDropdownHideUnderline: true,
+                              // optional
+                              isFormValidator: true,
+                              // optional
+                              startYear: 1900,
+                              // optional
+                              endYear: 2020,
+                              // optional
+                              width: 0.5,
+                              // optional
+                              selectedDay: _selectedDay,
+                              // optional
+                              selectedMonth: _selectedMonth,
+                              // optional
+                              selectedYear: _selectedYear,
+                              // optional
+                              boxDecoration: BoxDecoration(
+                                border: Border.all(
+                                    color: Colors.black26, width: 0.5),
+                              ),
+                              hintTextStyle:
+                              const TextStyle(color: Colors.black38),
+                              onChangedDay: (value) {
+                                _selectedDay = int.parse(value!);
+                                print('onChangedDay: $value');
+                              },
+                              onChangedMonth: (value) {
+                                _selectedMonth = int.parse(value!);
+                                print('onChangedMonth: $value');
+                              },
+                              onChangedYear: (value) {
+                                _selectedYear = int.parse(value!);
+                                print('onChangedYear: $value');
+                              },
+                            ),
+                          ],
                         ),
                       ),
-                      value: true,
-                      onChanged: (newValue) {},
-                      controlAffinity: ListTileControlAffinity.leading,
+                    ),
+                    SizedBox(
+                      height: 2,
+                    ),
+                    SizedBox(
+                      height: 2,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -265,47 +323,98 @@ class RegisterPage extends State<RegisterScreen> {
                             backgroundColor: Colors.black38,
                             foregroundColor: Colors.white70,
                           ),
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              formKey.currentState!.save();
-                              DateTime? date = _dateTime(
-                                  _selectedDay, _selectedMonth, _selectedYear);
+                          onPressed: () async {
+                            try {
+                              final email = _emailController.text;
+                              final password = _passwordController.text;
+                              final firstName = _firstNameController.text;
+                              final lastName = _lastNameController.text;
+                              final displayName = _displayNameController.text;
+                              final country = _countryController.text;
+                              final phone = _phoneController.text;
+
+
+                              if (formKey.currentState!.validate()) {
+                                formKey.currentState!.save();
+                                final DateTime? date = _dateTime(
+                                    _selectedDay, _selectedMonth,
+                                    _selectedYear);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    action: SnackBarAction(
+                                      label: 'OK',
+                                      onPressed: () {},
+                                    ),
+                                    content: Text('selected date is $date'),
+                                    elevation: 20,
+                                  ),
+                                );
+                              } else {
+                                print('on error');
+                                setState(() {
+                                  _autovalidate = AutovalidateMode.always;
+                                });
+                              }
+                              // Step 1: Register the user using Supabase authentication
+                              final response =
+                              await Supabase.instance.client.auth.signUp(
+                                  password: password,
+                                  email: email,
+
+                                  // Step 3: Insert user's data into the user_info table
+                                  data: { 'display_name':displayName,'first_name': firstName, 'last_name': lastName,'country': country,'phone': phone}
+                              );
+                              if (response.user == null) {
+                                print('Sign up NOT successful!');
+                                throw "failed to sign up";
+                              } else {
+                                final supabase = Supabase.instance.client;
+                                await supabase
+                                    .from('high_scores')
+                                    .insert({'username': displayName, 'email': email});
+                                print('Sign up successful!');
+                              }
+
+                              // If everything is successful, the sign-up process is complete
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  action: SnackBarAction(
-                                    label: 'OK',
-                                    onPressed: () {},
-                                  ),
-                                  content: Text('selected date is $date'),
-                                  elevation: 20,
+                                  content: Text('Sign Up Successful'),
+                                  backgroundColor: Colors.redAccent,
                                 ),
                               );
-                            } else {
-                              //print('on error');
-                              setState(() {
-                                autoValidate = AutovalidateMode.always;
-                              });
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                ),
+                              );
                             }
+
+                            on AuthException catch (error)  {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(error.message),
+                                  backgroundColor: Colors.redAccent,
+                                ),
+                              );
+
+                            }
+
                           },
                           child: const Text('Create Neon Account'),
-                        )
+                        ),
                       ],
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
       ),
     );
   }
-
-  //String to datetime conversion
-  DateTime? _dateTime(int? day, int? month, int? year) {
-    if (day != null && month != null && year != null) {
-      return DateTime(year, month, day);
-    }
-    return null;
-  }
 }
+
+
+

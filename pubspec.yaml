@@ -58,6 +58,12 @@ dev_dependencies:
     sdk: flutter
   desktop_window:
   msix: ^3.16.7
+msix_config:
+  display_name: Neon
+  publisher_display_name: Cyberpunk Coorporation
+  identity_name: MrCyberp0nk
+  msix_version: 1.0.0.0
+  logo_path: V:\project_neon\assets\installer.png
 
 
 

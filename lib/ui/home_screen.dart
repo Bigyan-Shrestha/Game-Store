@@ -14,7 +14,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _loading = false;
+
   final supabase = Supabase.instance.client;
+
   PageController pageController = PageController();
   SideMenuController sideMenu = SideMenuController();
 
@@ -47,6 +49,24 @@ class _HomeScreenState extends State<HomeScreen> {
     pageController.dispose();
     super.dispose();
   }
+
+  getCurrentUser() async {
+    final currentUser = supabase.auth.currentUser;
+    if (currentUser != null) {
+      final response = await supabase.from('current_user').select(
+        {
+          'email': currentUser.email,
+          'username': currentUser.userMetadata?['display_name'],
+          'fullname':currentUser.userMetadata?['fullname'],
+        } as String,
+
+      );
+      print('Error displaying user data: ${response}');
+        } else {
+      print('No current user authenticated');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -143,19 +163,48 @@ class _HomeScreenState extends State<HomeScreen> {
                   case 0:
                     return Store(); // Your Store page
                   case 1:
-                    return const Center(
-                      child: Text(
-                        'Library',
-                        style: TextStyle(fontSize: 35),
+                    return Container(
+                      color: Colors.black87,
+                      // Set your desired background color
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'User Information:',
+                              style: TextStyle(color: Colors.white, fontSize: 25),
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            FutureBuilder(
+                              future: getCurrentUser(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  // You can return a loading indicator here if needed
+                                  return CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  // Handle error
+                                  return Text('Error: ${snapshot.error}');
+                                } else {
+                                  // Display user information
+                                  final user = snapshot.data;
+                                  return Column(
+                                    children: [
+                                      //Text('Email: ${getCurrentUser().email}'),
+                                      Text('Username: ${getCurrentUser().user['display_name']}'),
+                                      //Text('Fullname: ${getCurrentUser()['email']}'),
+                                    ],
+                                  );
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   case 2:
-                    return const Center(
-                      child: Text(
-                        'Files',
-                        style: TextStyle(fontSize: 35),
-                      ),
-                    );
+
 
                   case 3:
                     return Container(
