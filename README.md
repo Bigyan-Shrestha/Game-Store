@@ -1,6 +1,6 @@
 # project_neon
 
-A new Flutter project.
+Windows/Web Application for Undergraduate Project aka Game Distribution Platform(Neon).
 
 ## Getting Started
 
